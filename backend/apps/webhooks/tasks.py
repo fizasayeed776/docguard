@@ -1,3 +1,4 @@
+import hashlib
 import logging
 
 from celery import shared_task
@@ -27,8 +28,12 @@ def handle_github_push(workspace_id: str, changed_paths: list[str], payload: dic
 
     dispatched = 0
     for source in sources:
-        for file_info in get_github_files_for_paths(source, changed_paths):
-            import hashlib
+        try:
+            files = get_github_files_for_paths(source, changed_paths)
+        except Exception:
+            logger.exception("GitHub fetch failed for source %s", source.id)
+            raise
+        for file_info in files:
 
             content_hash = hashlib.sha256(file_info["content"].encode("utf-8")).hexdigest()
             process_artifact.delay(

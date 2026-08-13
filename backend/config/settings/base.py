@@ -161,6 +161,7 @@ CELERY_TIMEZONE = TIME_ZONE
 # expensive) are kept separate so a burst of file syncs never starves agent
 # scans, and vice versa.
 CELERY_TASK_ROUTES = {
+    "apps.webhooks.tasks.*": {"queue": "ingestion"},
     "apps.sources.tasks.*": {"queue": "ingestion"},
     "apps.knowledge.tasks.*": {"queue": "ingestion"},
     "apps.agents.tasks.*": {"queue": "llm"},
