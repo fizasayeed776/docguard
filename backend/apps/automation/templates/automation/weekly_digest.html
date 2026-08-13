@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: sans-serif; color: #1a1a1a;">
+  <h2>DocGuard Weekly Digest &mdash; {{ workspace.name }}</h2>
+  <p>
+    <strong>{{ scan_count }}</strong> scans ran this week &middot;
+    <strong>{{ new_issue_count }}</strong> new issues found
+    (<strong>{{ critical_count }}</strong> critical) &middot;
+    <strong>{{ fixed_count }}</strong> fixed
+  </p>
+  <h3>Top issues</h3>
+  <ul>
+    {% for issue in issues %}
+      <li>[{{ issue.severity }}] {{ issue.agent_reasoning|truncatewords:20 }}</li>
+    {% empty %}
+      <li>No new issues this week &mdash; nice and consistent!</li>
+    {% endfor %}
+  </ul>
+  <p><a href="#">Open dashboard</a></p>
+</body>
+</html>

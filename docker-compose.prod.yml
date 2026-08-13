@@ -1,0 +1,26 @@
+services:
+  web:
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 5 --timeout 60
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    restart: always
+
+  asgi:
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    restart: always
+
+  worker-ingestion:
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    deploy:
+      replicas: 2
+
+  worker-llm:
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+
+  nginx:
+    ports:
+      - "443:443"
+      - "80:80"

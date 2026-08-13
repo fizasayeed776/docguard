@@ -1,0 +1,37 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+staticfiles/
+
+# JavaScript
+node_modules/
+dist/
+
+# Docker runtime data
+postgres_data/
+redis_data/
+*.sqlite3
+
+# Local/editor artifacts
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.vscode/
+
+# Local diagnostic command output
+build_web.txt
+dir_output.txt
+docker_*.txt
+hello_out.txt
+makemigrations_*.txt
+migrate_*.txt
+terminal_*.txt
+test_dir.txt
+force_test*.py
