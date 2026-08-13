@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import os
 
 from asgiref.sync import async_to_sync
 from celery import shared_task
@@ -153,9 +154,60 @@ def _list_source_files(source):
             logger.warning("Upload source %s has no files in config['files']", source.id)
         return files
 
+    if source.type == Source.Type.GITHUB_REPO:
+        return _get_github_files(source)
+
     raise NotImplementedError(
         f"'{source.type}' source type not implemented yet — only 'upload' is wired up so far."
     )
+
+
+def get_github_files_for_paths(source, paths: list[str]) -> list[dict]:
+    """Fetch only the files named by a GitHub push delivery."""
+    return _get_github_files(source, paths=paths)
+
+
+def _get_github_files(source, paths: list[str] | None = None) -> list[dict]:
+    """Read repository files through GitHub's Contents API.
+
+    Source.config needs ``repo`` as GitHub's ``owner/repository`` full name
+    and may specify ``branch``. Authentication comes from the environment
+    variable named by ``credentials_ref`` (or ``GITHUB_TOKEN``), never config.
+    """
+    from github import Github
+
+    repo_name = source.config.get("repo", "")
+    if not repo_name:
+        raise ValueError(f"GitHub source {source.id} is missing config['repo']")
+    token_env_name = source.credentials_ref or "GITHUB_TOKEN"
+    token = os.environ.get(token_env_name, "")
+    if not token:
+        raise ValueError(f"GitHub source {source.id} has no token in {token_env_name!r}")
+
+    repository = Github(token).get_repo(repo_name)
+    branch = source.config.get("branch") or repository.default_branch
+    requested_paths = paths if paths is not None else _github_repository_paths(repository, branch)
+    files = []
+    for path in requested_paths:
+        try:
+            contents = repository.get_contents(path, ref=branch)
+        except Exception as exc:
+            logger.info("GitHub source %s skipped %s: %s", source.id, path, exc)
+            continue
+        if isinstance(contents, list) or getattr(contents, "type", None) != "file":
+            continue
+        try:
+            content = contents.decoded_content.decode("utf-8")
+        except UnicodeDecodeError:
+            logger.info("GitHub source %s skipped non-UTF-8 file %s", source.id, path)
+            continue
+        files.append({"path": path, "content": content, "version": contents.sha})
+    return files
+
+
+def _github_repository_paths(repository, branch: str) -> list[str]:
+    tree = repository.get_git_tree(branch, recursive=True)
+    return [item.path for item in tree.tree if item.type == "blob"]
 
 
 def _infer_file_type(path: str) -> str:
