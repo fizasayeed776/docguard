@@ -73,8 +73,6 @@ the React dashboard renders it without a page refresh.
   `GITHUB_APP_PRIVATE_KEY`) is wired into settings but not implemented.
 - `apps/agents/definitions.py` contains Strands Agents SDK drafts; these are
   reference code only and are not called from the live pipeline.
-- Test coverage remains below 60% (currently ~57%), so the full suite is still
-  not broad enough for large-scale production sign-off.
 
 ## Layout
 
