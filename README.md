@@ -147,8 +147,8 @@ docker compose exec web python -m coverage report
 ```
 
 **Current results (August 2026):**
-- 18 tests, all passing
-- 57% line coverage
+- 128 tests, all passing
+- 87% line coverage
 - Precision: 1.00 · Recall: 0.80 (heuristic pipeline, 8-case fixture)
 
 See `docs/agent-iteration-log.md` for the full precision/recall breakdown and
